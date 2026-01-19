@@ -1,0 +1,540 @@
+/**
+ * 🏆 UNIVERSAL GOLD THEME CSS
+ * Include di SEMUA halaman dengan: <link rel="stylesheet" href="assets/css/universal-gold-theme.css">
+ * File ini akan override semua warna ke tema Gold Premium
+ */
+
+/* ============================================
+   FORCE GOLD THEME - OVERRIDE SEMUA
+   ============================================ */
+
+/* Background & Body */
+body {
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #2d2d2d 100%) !important;
+    color: #ffffff !important;
+}
+
+/* Animated Background Pattern */
+body::before {
+    content: '' !important;
+    position: fixed !important;
+    top: -50% !important;
+    left: -50% !important;
+    width: 200% !important;
+    height: 200% !important;
+    background: 
+        radial-gradient(circle at 20% 30%, rgba(218, 165, 32, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(255, 215, 0, 0.06) 0%, transparent 50%) !important;
+    animation: backgroundFloat 30s ease-in-out infinite !important;
+    pointer-events: none !important;
+    z-index: 0 !important;
+}
+
+@keyframes backgroundFloat {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    33% { transform: translate(30px, -30px) rotate(120deg); }
+    66% { transform: translate(-20px, 20px) rotate(240deg); }
+}
+
+/* ============================================
+   BUTTONS - ALL GOLD
+   ============================================ */
+
+.btn-primary,
+button.btn-primary,
+a.btn-primary,
+input[type="submit"].btn-primary {
+    background: linear-gradient(135deg, #B8860B, #DAA520) !important;
+    color: #0a0a0a !important;
+    border: 2px solid #FFD700 !important;
+    box-shadow: 0 4px 12px rgba(218, 165, 32, 0.4) !important;
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active {
+    background: linear-gradient(135deg, #DAA520, #FFD700) !important;
+    color: #0a0a0a !important;
+    box-shadow: 0 6px 20px rgba(218, 165, 32, 0.6) !important;
+    transform: translateY(-2px) !important;
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #10b981, #059669) !important;
+    color: white !important;
+    border: none !important;
+}
+
+.btn-warning {
+    background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+    color: white !important;
+    border: none !important;
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+    color: white !important;
+    border: none !important;
+}
+
+.btn-info {
+    background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
+    color: white !important;
+    border: none !important;
+}
+
+.btn {
+    transition: all 0.3s ease !important;
+}
+
+.btn:hover {
+    transform: translateY(-2px) !important;
+}
+
+.btn:active {
+    transform: scale(0.95) !important;
+}
+
+/* ============================================
+   CARDS - GOLD BORDER & SHADOW
+   ============================================ */
+
+.card {
+    background: white !important;
+    border: 2px solid rgba(218, 165, 32, 0.3) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 4px 20px rgba(218, 165, 32, 0.15) !important;
+    transition: all 0.3s ease !important;
+    overflow: hidden !important;
+}
+
+.card:hover {
+    transform: translateY(-5px) !important;
+    box-shadow: 0 8px 30px rgba(218, 165, 32, 0.3) !important;
+    border-color: #DAA520 !important;
+}
+
+.card-header {
+    background: linear-gradient(135deg, #B8860B, #DAA520) !important;
+    color: #0a0a0a !important;
+    border: none !important;
+    border-bottom: 3px solid #FFD700 !important;
+    font-weight: 700 !important;
+}
+
+.card-header h1,
+.card-header h2,
+.card-header h3,
+.card-header h4,
+.card-header h5,
+.card-header h6 {
+    color: #0a0a0a !important;
+    margin: 0 !important;
+}
+
+.card-body {
+    color: #0a0a0a !important;
+}
+
+/* ============================================
+   TABLES - GOLD THEME
+   ============================================ */
+
+.table {
+    color: #0a0a0a !important;
+}
+
+.table thead th {
+    background: linear-gradient(135deg, #FFF8DC, #fff8dc) !important;
+    color: #0a0a0a !important;
+    border-bottom: 2px solid #B8860B !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    font-size: 12px !important;
+    letter-spacing: 0.5px !important;
+}
+
+.table tbody tr:hover {
+    background: rgba(218, 165, 32, 0.1) !important;
+}
+
+.table tbody td {
+    border-color: rgba(218, 165, 32, 0.2) !important;
+}
+
+/* ============================================
+   BADGES - GOLD VARIANTS
+   ============================================ */
+
+.badge-primary,
+.bg-primary.badge {
+    background: linear-gradient(135deg, #B8860B, #DAA520) !important;
+    color: #0a0a0a !important;
+}
+
+.badge-success,
+.bg-success.badge {
+    background: linear-gradient(135deg, #10b981, #059669) !important;
+    color: white !important;
+}
+
+.badge-warning,
+.bg-warning.badge {
+    background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+    color: white !important;
+}
+
+.badge-danger,
+.bg-danger.badge {
+    background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+    color: white !important;
+}
+
+.badge-info,
+.bg-info.badge {
+    background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
+    color: white !important;
+}
+
+/* ============================================
+   FORMS - GOLD INPUTS
+   ============================================ */
+
+.form-control,
+.form-select,
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="date"],
+input[type="time"],
+textarea,
+select {
+    background: white !important;
+    border: 2px solid rgba(218, 165, 32, 0.3) !important;
+    color: #0a0a0a !important;
+    transition: all 0.3s ease !important;
+}
+
+.form-control:focus,
+.form-select:focus,
+input:focus,
+textarea:focus,
+select:focus {
+    border-color: #DAA520 !important;
+    box-shadow: 0 0 0 0.2rem rgba(218, 165, 32, 0.25) !important;
+    outline: none !important;
+}
+
+.form-label,
+label {
+    color: #0a0a0a !important;
+    font-weight: 600 !important;
+}
+
+/* Dark background forms */
+.sidebar .form-control,
+.topbar .form-control,
+[style*="background: #1f2937"] .form-control,
+[style*="background: #374151"] .form-control {
+    background: rgba(45, 45, 45, 0.8) !important;
+    color: #FFD700 !important;
+}
+
+.sidebar .form-label,
+.topbar .form-label,
+[style*="background: #1f2937"] .form-label,
+[style*="background: #374151"] .form-label {
+    color: #FFD700 !important;
+}
+
+/* ============================================
+   MODALS - GOLD THEME
+   ============================================ */
+
+.modal-content {
+    background: white !important;
+    border: 2px solid #B8860B !important;
+    border-radius: 20px !important;
+    box-shadow: 0 20px 50px rgba(218, 165, 32, 0.4) !important;
+}
+
+.modal-header {
+    background: linear-gradient(135deg, #B8860B, #DAA520) !important;
+    color: #0a0a0a !important;
+    border: none !important;
+}
+
+.modal-header .btn-close {
+    filter: brightness(0) !important;
+}
+
+.modal-title {
+    color: #0a0a0a !important;
+    font-weight: 700 !important;
+}
+
+.modal-body {
+    color: #0a0a0a !important;
+}
+
+.modal-footer {
+    border-top: 1px solid rgba(218, 165, 32, 0.2) !important;
+}
+
+/* ============================================
+   ALERTS - GOLD ACCENTS
+   ============================================ */
+
+.alert {
+    border-radius: 12px !important;
+    border: none !important;
+}
+
+.alert-primary {
+    background: rgba(218, 165, 32, 0.15) !important;
+    border-left: 4px solid #DAA520 !important;
+    color: #B8860B !important;
+}
+
+.alert-success {
+    background: rgba(16, 185, 129, 0.15) !important;
+    border-left: 4px solid #10b981 !important;
+    color: #065f46 !important;
+}
+
+.alert-warning {
+    background: rgba(245, 158, 11, 0.15) !important;
+    border-left: 4px solid #f59e0b !important;
+    color: #92400e !important;
+}
+
+.alert-danger {
+    background: rgba(239, 68, 68, 0.15) !important;
+    border-left: 4px solid #ef4444 !important;
+    color: #991b1b !important;
+}
+
+.alert-info {
+    background: rgba(59, 130, 246, 0.15) !important;
+    border-left: 4px solid #3b82f6 !important;
+    color: #1e40af !important;
+}
+
+/* ============================================
+   TEXT COLORS - OVERRIDE
+   ============================================ */
+
+.text-primary {
+    color: #DAA520 !important;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: #0a0a0a !important;
+}
+
+/* Dark backgrounds */
+.sidebar h1,
+.sidebar h2,
+.sidebar h3,
+.sidebar h4,
+.sidebar h5,
+.sidebar h6,
+.topbar h1,
+.topbar h2,
+.topbar h3,
+.topbar h4,
+.topbar h5,
+.topbar h6,
+[style*="background: #1f2937"] h1,
+[style*="background: #1f2937"] h2,
+[style*="background: #1f2937"] h3,
+[style*="background: #374151"] h1,
+[style*="background: #374151"] h2,
+[style*="background: #374151"] h3 {
+    color: #FFD700 !important;
+}
+
+/* ============================================
+   BACKGROUND COLORS - OVERRIDE
+   ============================================ */
+
+.bg-primary:not(.badge):not(.btn) {
+    background: linear-gradient(135deg, #B8860B, #DAA520) !important;
+    color: #0a0a0a !important;
+}
+
+/* ============================================
+   BORDERS - GOLD
+   ============================================ */
+
+.border-primary {
+    border-color: #DAA520 !important;
+}
+
+.border-top,
+.border-bottom,
+.border-start,
+.border-end {
+    border-color: rgba(218, 165, 32, 0.2) !important;
+}
+
+/* ============================================
+   LINKS - GOLD
+   ============================================ */
+
+a {
+    color: #DAA520 !important;
+    transition: color 0.3s ease !important;
+}
+
+a:hover {
+    color: #FFD700 !important;
+}
+
+/* ============================================
+   SCROLLBAR - GOLD
+   ============================================ */
+
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #2d2d2d;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #B8860B, #DAA520);
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #DAA520, #FFD700);
+}
+
+/* ============================================
+   PROGRESS BARS - GOLD
+   ============================================ */
+
+.progress {
+    background: rgba(218, 165, 32, 0.2) !important;
+}
+
+.progress-bar {
+    background: linear-gradient(90deg, #B8860B, #DAA520) !important;
+}
+
+/* ============================================
+   TOOLTIPS & POPOVERS - GOLD
+   ============================================ */
+
+.tooltip-inner {
+    background: #0a0a0a !important;
+    border: 1px solid #DAA520 !important;
+}
+
+.popover {
+    border-color: #DAA520 !important;
+}
+
+.popover-header {
+    background: linear-gradient(135deg, #B8860B, #DAA520) !important;
+    color: #0a0a0a !important;
+}
+
+/* ============================================
+   DROPDOWN - GOLD
+   ============================================ */
+
+.dropdown-menu {
+    background: white !important;
+    border: 2px solid rgba(218, 165, 32, 0.3) !important;
+    box-shadow: 0 4px 20px rgba(218, 165, 32, 0.2) !important;
+}
+
+.dropdown-item:hover {
+    background: rgba(218, 165, 32, 0.1) !important;
+    color: #B8860B !important;
+}
+
+.dropdown-item.active {
+    background: linear-gradient(135deg, #B8860B, #DAA520) !important;
+    color: #0a0a0a !important;
+}
+
+/* ============================================
+   PAGINATION - GOLD
+   ============================================ */
+
+.pagination .page-link {
+    color: #B8860B !important;
+    border-color: rgba(218, 165, 32, 0.3) !important;
+}
+
+.pagination .page-item.active .page-link {
+    background: linear-gradient(135deg, #B8860B, #DAA520) !important;
+    border-color: #DAA520 !important;
+    color: #0a0a0a !important;
+}
+
+.pagination .page-link:hover {
+    background: rgba(218, 165, 32, 0.1) !important;
+    color: #DAA520 !important;
+}
+
+/* ============================================
+   SPECIAL ELEMENTS OVERRIDE
+   ============================================ */
+
+/* Remove any purple/blue gradients */
+[style*="667eea"],
+[style*="764ba2"],
+[style*="6366f1"],
+[style*="8b5cf6"] {
+    background: linear-gradient(135deg, #B8860B, #DAA520) !important;
+}
+
+/* Remove any non-gold primary colors */
+.bg-purple,
+.bg-blue,
+.bg-indigo,
+.bg-violet {
+    background: linear-gradient(135deg, #B8860B, #DAA520) !important;
+}
+
+/* ============================================
+   MOBILE RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+    .card {
+        margin: 10px !important;
+        border-radius: 12px !important;
+    }
+    
+    .btn {
+        padding: 12px 20px !important;
+    }
+}
+
+/* ============================================
+   PRINT STYLES
+   ============================================ */
+
+@media print {
+    body {
+        background: white !important;
+        color: black !important;
+    }
+    
+    .card {
+        border: 1px solid #ddd !important;
+        box-shadow: none !important;
+    }
+    
+    .no-print {
+        display: none !important;
+    }
+}
