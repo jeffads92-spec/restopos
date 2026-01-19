@@ -75,8 +75,3 @@ try {
     echo "<p style='color:red'>ERROR: " . $e->getMessage() . "</p>";
 }
 ?>
-```
-
-Save sebagai `db-install.php`, push ke Railway, lalu akses:
-```
-https://attractive-communication-production.up.railway.app/db-install.php
