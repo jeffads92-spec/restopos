@@ -1,41 +1,53 @@
 <?php
-// Start session
+/**
+ * Smart Resto POS - Railway Database Configuration
+ * Automatically detects Railway environment
+ */
+
+// Session configuration for Railway (ephemeral filesystem)
+ini_set('session.save_path', '/tmp');
 session_start();
 
-// Environment Detection
-define('ENVIRONMENT', getenv('RAILWAY_ENVIRONMENT') ?: 'development');
+// Error reporting
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+ini_set('log_errors', 1);
+ini_set('error_log', '/tmp/php_errors.log');
 
-// Database Configuration
-// Railway will auto-inject these environment variables when MySQL plugin is added
-define('DB_HOST', getenv('MYSQL_HOST') ?: 'localhost');
-define('DB_USER', getenv('MYSQL_USER') ?: 'root');
-define('DB_PASS', getenv('MYSQL_PASSWORD') ?: '');
-define('DB_NAME', getenv('MYSQL_DATABASE') ?: 'smart_resto_pos');
-define('DB_PORT', getenv('MYSQL_PORT') ?: 3306);
+// Detect environment
+define('ENVIRONMENT', getenv('RAILWAY_ENVIRONMENT') ? 'production' : 'development');
+
+// Database Configuration - Railway Environment Variables
+if (ENVIRONMENT === 'production') {
+    // Railway MySQL Variables (without underscore)
+    define('DB_HOST', getenv('MYSQLHOST') ?: 'localhost');
+    define('DB_PORT', getenv('MYSQLPORT') ?: '3306');
+    define('DB_USER', getenv('MYSQLUSER') ?: 'root');
+    define('DB_PASS', getenv('MYSQLPASSWORD') ?: '');
+    define('DB_NAME', getenv('MYSQLDATABASE') ?: 'railway');
+} else {
+    // Local Development
+    define('DB_HOST', 'localhost');
+    define('DB_PORT', '3306');
+    define('DB_USER', 'root');
+    define('DB_PASS', '');
+    define('DB_NAME', 'smart_resto_pos');
+}
 
 // Application Configuration
 define('APP_NAME', 'Smart Resto POS');
 define('APP_VERSION', '1.0.0');
 
 // Base URL - Auto detect with Railway support
-if (getenv('RAILWAY_PUBLIC_DOMAIN')) {
-    // Railway environment
-    $protocol = 'https';
-    $host = getenv('RAILWAY_PUBLIC_DOMAIN');
-    $base_path = '';
-} else {
-    // Local or other hosting
-    $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || 
-                (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') 
-                ? 'https' : 'http';
-    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
-    $base_path = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
-    $base_path = rtrim($base_path, '/');
-}
+$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || 
+            (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') 
+            ? 'https' : 'http';
+$host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+$base_path = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
+$base_path = rtrim($base_path, '/');
 define('BASE_URL', $protocol . '://' . $host . $base_path . '/');
 
-// Upload Configuration
-// Railway file system is ephemeral, so use /tmp for uploads
+// Upload Configuration - Use /tmp for Railway
 if (ENVIRONMENT === 'production') {
     define('UPLOAD_PATH', '/tmp/uploads/products/');
 } else {
@@ -54,68 +66,49 @@ define('CURRENCY', 'Rp');
 // Timezone
 date_default_timezone_set('Asia/Jakarta');
 
-// Error Reporting based on environment
-if (ENVIRONMENT === 'production') {
-    ini_set('display_errors', 0);
-    ini_set('log_errors', 1);
-    ini_set('error_log', '/tmp/php-error.log');
-    error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
-} else {
-    ini_set('display_errors', 1);
-    error_reporting(E_ALL);
-}
-
-// Session Configuration
-ini_set('session.gc_maxlifetime', 3600);
-session_set_cookie_params([
-    'lifetime' => 3600,
-    'path' => '/',
-    'secure' => ENVIRONMENT === 'production',
-    'httponly' => true,
-    'samesite' => 'Strict'
-]);
-
 // Database Connection with error handling
+$conn = null;
 try {
-    // Create connection with port support
+    // Create connection with port for Railway
     $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME, DB_PORT);
     
     if ($conn->connect_error) {
         throw new Exception("Connection failed: " . $conn->connect_error);
     }
     
-    // Set charset
     $conn->set_charset("utf8mb4");
     
-    // Set timezone for MySQL
-    $conn->query("SET time_zone = '+07:00'");
+    // Log successful connection in Railway
+    if (ENVIRONMENT === 'production') {
+        error_log("✅ Database connected successfully to " . DB_HOST . ":" . DB_PORT);
+    }
     
 } catch (Exception $e) {
-    error_log("Database Connection Error: " . $e->getMessage());
+    error_log("❌ Database Connection Error: " . $e->getMessage());
+    error_log("Host: " . DB_HOST . ":" . DB_PORT);
+    error_log("Database: " . DB_NAME);
+    error_log("User: " . DB_USER);
     
     if (ENVIRONMENT === 'development') {
-        die("Database error: " . $e->getMessage() . "<br><br>
-             <strong>Connection Details:</strong><br>
-             Host: " . DB_HOST . ":" . DB_PORT . "<br>
-             Database: " . DB_NAME . "<br>
-             User: " . DB_USER);
+        die("Database error: " . $e->getMessage());
     } else {
+        http_response_code(503);
         die("
         <!DOCTYPE html>
-        <html lang='id'>
+        <html>
         <head>
-            <meta charset='UTF-8'>
-            <meta name='viewport' content='width=device-width, initial-scale=1.0'>
             <title>Service Unavailable</title>
+            <meta charset='utf-8'>
+            <meta name='viewport' content='width=device-width, initial-scale=1'>
             <style>
-                * { margin: 0; padding: 0; box-sizing: border-box; }
                 body { 
-                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
                     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     min-height: 100vh;
+                    margin: 0;
                     padding: 20px;
                 }
                 .error-container {
@@ -127,39 +120,28 @@ try {
                     max-width: 500px;
                     width: 100%;
                 }
-                .icon { 
-                    font-size: 64px; 
-                    margin-bottom: 20px; 
-                    animation: pulse 2s ease-in-out infinite;
-                }
-                @keyframes pulse {
-                    0%, 100% { transform: scale(1); }
-                    50% { transform: scale(1.1); }
-                }
-                h1 { 
-                    color: #e74c3c; 
-                    margin-bottom: 20px; 
-                    font-size: 28px;
-                }
-                p { 
-                    color: #555; 
-                    line-height: 1.6; 
-                    margin-bottom: 10px;
-                }
-                .retry-btn {
+                h1 { color: #e74c3c; margin: 0 0 20px 0; font-size: 28px; }
+                p { color: #555; line-height: 1.6; margin: 10px 0; }
+                .icon { font-size: 64px; margin-bottom: 20px; }
+                .btn-retry {
+                    display: inline-block;
                     margin-top: 20px;
                     padding: 12px 30px;
-                    background: #667eea;
+                    background: #3498db;
                     color: white;
-                    border: none;
+                    text-decoration: none;
                     border-radius: 8px;
-                    cursor: pointer;
-                    font-size: 16px;
-                    transition: all 0.3s;
+                    font-weight: 600;
+                    transition: background 0.3s;
                 }
-                .retry-btn:hover {
-                    background: #5568d3;
-                    transform: translateY(-2px);
+                .btn-retry:hover { background: #2980b9; }
+                .error-details {
+                    margin-top: 20px;
+                    padding: 15px;
+                    background: #f8f9fa;
+                    border-radius: 8px;
+                    font-size: 12px;
+                    color: #666;
                 }
             </style>
         </head>
@@ -169,7 +151,11 @@ try {
                 <h1>Service Unavailable</h1>
                 <p>We're having trouble connecting to the database.</p>
                 <p>Please try again in a few moments.</p>
-                <button class='retry-btn' onclick='location.reload()'>Retry Connection</button>
+                <a href='javascript:location.reload()' class='btn-retry'>🔄 Retry Connection</a>
+                <div class='error-details'>
+                    <strong>Technical Details:</strong><br>
+                    " . htmlspecialchars($e->getMessage()) . "
+                </div>
             </div>
         </body>
         </html>
@@ -287,28 +273,14 @@ function generateMemberCode($db_conn = null) {
     return 'MBR' . date('YmdHis') . mt_rand(10, 99);
 }
 
-// Create directories if not exist (only in development)
-if (ENVIRONMENT !== 'production') {
-    if (!file_exists(UPLOAD_PATH)) {
-        @mkdir(UPLOAD_PATH, 0755, true);
-    }
-    
-    $log_dir = __DIR__ . '/logs';
-    if (!file_exists($log_dir)) {
-        @mkdir($log_dir, 0755, true);
-    }
-} else {
-    // In production (Railway), create /tmp directories
-    if (!file_exists('/tmp/uploads/products')) {
-        @mkdir('/tmp/uploads/products', 0755, true);
-    }
+// Create upload directories if not exist
+if (!file_exists(UPLOAD_PATH)) {
+    @mkdir(UPLOAD_PATH, 0777, true);
 }
 
-// Force HTTPS in production
-if (ENVIRONMENT === 'production' && 
-    (!isset($_SERVER['HTTPS']) || $_SERVER['HTTPS'] !== 'on') &&
-    (!isset($_SERVER['HTTP_X_FORWARDED_PROTO']) || $_SERVER['HTTP_X_FORWARDED_PROTO'] !== 'https')) {
-    header('Location: https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']);
-    exit;
+// Create logs directory
+$log_dir = __DIR__ . '/logs';
+if (!file_exists($log_dir)) {
+    @mkdir($log_dir, 0777, true);
 }
 ?>
