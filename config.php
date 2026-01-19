@@ -1,10 +1,9 @@
 <?php
 /**
  * Smart Resto POS - Railway Database Configuration
- * Automatically detects Railway environment
  */
 
-// Session configuration for Railway (ephemeral filesystem)
+// Session configuration for Railway
 ini_set('session.save_path', '/tmp');
 session_start();
 
@@ -19,8 +18,8 @@ define('ENVIRONMENT', getenv('RAILWAY_ENVIRONMENT') ? 'production' : 'developmen
 
 // Database Configuration - Railway Environment Variables
 if (ENVIRONMENT === 'production') {
-    // Railway MySQL Variables (without underscore)
-    define('DB_HOST', getenv('MYSQLHOST') ?: 'localhost');
+    // TRY INTERNAL FIRST, FALLBACK TO PUBLIC
+    define('DB_HOST', getenv('MYSQLHOST') ?: 'mysql.railway.internal');
     define('DB_PORT', getenv('MYSQLPORT') ?: '3306');
     define('DB_USER', getenv('MYSQLUSER') ?: 'root');
     define('DB_PASS', getenv('MYSQLPASSWORD') ?: '');
@@ -35,7 +34,7 @@ if (ENVIRONMENT === 'production') {
 }
 
 // Application Configuration
-define('APP_NAME', 'Smart Resto POS');
+define('APP_NAME', 'Stasiun Kerang POS');
 define('APP_VERSION', '1.0.0');
 
 // Base URL - Auto detect with Railway support
@@ -68,98 +67,103 @@ date_default_timezone_set('Asia/Jakarta');
 
 // Database Connection with error handling
 $conn = null;
-try {
-    // Create connection with port for Railway
-    $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME, DB_PORT);
-    
-    if ($conn->connect_error) {
-        throw new Exception("Connection failed: " . $conn->connect_error);
-    }
-    
-    $conn->set_charset("utf8mb4");
-    
-    // Log successful connection in Railway
-    if (ENVIRONMENT === 'production') {
-        error_log("✅ Database connected successfully to " . DB_HOST . ":" . DB_PORT);
-    }
-    
-} catch (Exception $e) {
-    error_log("❌ Database Connection Error: " . $e->getMessage());
-    error_log("Host: " . DB_HOST . ":" . DB_PORT);
-    error_log("Database: " . DB_NAME);
-    error_log("User: " . DB_USER);
-    
-    if (ENVIRONMENT === 'development') {
-        die("Database error: " . $e->getMessage());
-    } else {
-        http_response_code(503);
-        die("
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Service Unavailable</title>
-            <meta charset='utf-8'>
-            <meta name='viewport' content='width=device-width, initial-scale=1'>
-            <style>
-                body { 
-                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    min-height: 100vh;
-                    margin: 0;
-                    padding: 20px;
-                }
-                .error-container {
-                    background: white;
-                    padding: 40px;
-                    border-radius: 20px;
-                    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-                    text-align: center;
-                    max-width: 500px;
-                    width: 100%;
-                }
-                h1 { color: #e74c3c; margin: 0 0 20px 0; font-size: 28px; }
-                p { color: #555; line-height: 1.6; margin: 10px 0; }
-                .icon { font-size: 64px; margin-bottom: 20px; }
-                .btn-retry {
-                    display: inline-block;
-                    margin-top: 20px;
-                    padding: 12px 30px;
-                    background: #3498db;
-                    color: white;
-                    text-decoration: none;
-                    border-radius: 8px;
-                    font-weight: 600;
-                    transition: background 0.3s;
-                }
-                .btn-retry:hover { background: #2980b9; }
-                .error-details {
-                    margin-top: 20px;
-                    padding: 15px;
-                    background: #f8f9fa;
-                    border-radius: 8px;
-                    font-size: 12px;
-                    color: #666;
-                }
-            </style>
-        </head>
-        <body>
-            <div class='error-container'>
-                <div class='icon'>⚠️</div>
-                <h1>Service Unavailable</h1>
-                <p>We're having trouble connecting to the database.</p>
-                <p>Please try again in a few moments.</p>
-                <a href='javascript:location.reload()' class='btn-retry'>🔄 Retry Connection</a>
-                <div class='error-details'>
-                    <strong>Technical Details:</strong><br>
-                    " . htmlspecialchars($e->getMessage()) . "
-                </div>
-            </div>
-        </body>
-        </html>
-        ");
+$connection_attempts = 0;
+$max_attempts = 3;
+
+while ($connection_attempts < $max_attempts && $conn === null) {
+    try {
+        $connection_attempts++;
+        
+        // Log connection attempt
+        if (ENVIRONMENT === 'production') {
+            error_log("Database connection attempt $connection_attempts: " . DB_HOST . ":" . DB_PORT);
+        }
+        
+        // Create connection
+        $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME, DB_PORT);
+        
+        if ($conn->connect_error) {
+            throw new Exception("Connection failed: " . $conn->connect_error);
+        }
+        
+        $conn->set_charset("utf8mb4");
+        
+        if (ENVIRONMENT === 'production') {
+            error_log("✅ Database connected successfully!");
+        }
+        
+        break; // Success, exit loop
+        
+    } catch (Exception $e) {
+        error_log("❌ Connection attempt $connection_attempts failed: " . $e->getMessage());
+        
+        // If not last attempt, wait before retry
+        if ($connection_attempts < $max_attempts) {
+            sleep(1);
+            $conn = null;
+        } else {
+            // All attempts failed
+            error_log("All connection attempts failed");
+            
+            if (ENVIRONMENT === 'development') {
+                die("Database error: " . $e->getMessage());
+            } else {
+                http_response_code(503);
+                die("
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Service Unavailable</title>
+                    <meta charset='utf-8'>
+                    <meta name='viewport' content='width=device-width, initial-scale=1'>
+                    <style>
+                        body { 
+                            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            min-height: 100vh;
+                            margin: 0;
+                            padding: 20px;
+                        }
+                        .error-container {
+                            background: white;
+                            padding: 40px;
+                            border-radius: 20px;
+                            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+                            text-align: center;
+                            max-width: 500px;
+                            width: 100%;
+                        }
+                        h1 { color: #e74c3c; margin: 0 0 20px 0; }
+                        p { color: #555; line-height: 1.6; margin: 10px 0; }
+                        .icon { font-size: 64px; margin-bottom: 20px; }
+                        .btn-retry {
+                            display: inline-block;
+                            margin-top: 20px;
+                            padding: 12px 30px;
+                            background: #3498db;
+                            color: white;
+                            text-decoration: none;
+                            border-radius: 8px;
+                            font-weight: 600;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class='error-container'>
+                        <div class='icon'>⚠️</div>
+                        <h1>Service Unavailable</h1>
+                        <p>We're having trouble connecting to the database.</p>
+                        <p>Please try again in a few moments.</p>
+                        <a href='javascript:location.reload()' class='btn-retry'>🔄 Retry Connection</a>
+                    </div>
+                </body>
+                </html>
+                ");
+            }
+        }
     }
 }
 
