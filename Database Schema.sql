@@ -1,246 +1,272 @@
 -- Smart Resto POS - Database Schema
--- Created: 2025
--- Database: smart_resto_pos
--- Compatible with Railway MySQL
+-- Database: railway (Railway MySQL)
+-- Restaurant: Stasiun Kerang
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
 
--- --------------------------------------------------------
-
 -- Table: users
-CREATE TABLE IF NOT EXISTS users (
-    user_id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(50) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,
-    full_name VARCHAR(100) NOT NULL,
-    email VARCHAR(100),
-    phone VARCHAR(20),
-    role ENUM('admin', 'kasir') NOT NULL DEFAULT 'kasir',
-    is_active TINYINT(1) DEFAULT 1,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_username (username),
-    INDEX idx_role (role)
+CREATE TABLE IF NOT EXISTS `users` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(50) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `full_name` varchar(100) NOT NULL,
+  `email` varchar(100) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `role` enum('admin','kasir') NOT NULL DEFAULT 'kasir',
+  `is_active` tinyint(1) DEFAULT 1,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `username` (`username`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Table: categories
-CREATE TABLE IF NOT EXISTS categories (
-    category_id INT AUTO_INCREMENT PRIMARY KEY,
-    category_name VARCHAR(100) NOT NULL,
-    description TEXT,
-    icon VARCHAR(50),
-    is_active TINYINT(1) DEFAULT 1,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_is_active (is_active)
+CREATE TABLE IF NOT EXISTS `categories` (
+  `category_id` int(11) NOT NULL AUTO_INCREMENT,
+  `category_name` varchar(100) NOT NULL,
+  `description` text DEFAULT NULL,
+  `icon` varchar(50) DEFAULT NULL,
+  `is_active` tinyint(1) DEFAULT 1,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`category_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Table: products
-CREATE TABLE IF NOT EXISTS products (
-    product_id INT AUTO_INCREMENT PRIMARY KEY,
-    category_id INT NOT NULL,
-    product_name VARCHAR(200) NOT NULL,
-    description TEXT,
-    image VARCHAR(255),
-    cost_price DECIMAL(12,2) DEFAULT 0.00,
-    selling_price DECIMAL(12,2) NOT NULL,
-    stock_quantity INT DEFAULT 0,
-    min_stock INT DEFAULT 5,
-    unit VARCHAR(50) DEFAULT 'pcs',
-    is_active TINYINT(1) DEFAULT 1,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (category_id) REFERENCES categories(category_id) ON DELETE CASCADE,
-    INDEX idx_category (category_id),
-    INDEX idx_is_active (is_active),
-    INDEX idx_stock (stock_quantity)
+CREATE TABLE IF NOT EXISTS `products` (
+  `product_id` int(11) NOT NULL AUTO_INCREMENT,
+  `category_id` int(11) NOT NULL,
+  `product_name` varchar(200) NOT NULL,
+  `description` text DEFAULT NULL,
+  `image` varchar(255) DEFAULT NULL,
+  `cost_price` decimal(12,2) DEFAULT 0.00,
+  `selling_price` decimal(12,2) NOT NULL,
+  `stock_quantity` int(11) DEFAULT 0,
+  `min_stock` int(11) DEFAULT 5,
+  `unit` varchar(50) DEFAULT 'porsi',
+  `is_active` tinyint(1) DEFAULT 1,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`product_id`),
+  KEY `idx_products_category` (`category_id`),
+  CONSTRAINT `fk_products_category` FOREIGN KEY (`category_id`) REFERENCES `categories` (`category_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Table: members
-CREATE TABLE IF NOT EXISTS members (
-    member_id INT AUTO_INCREMENT PRIMARY KEY,
-    member_code VARCHAR(50) NOT NULL UNIQUE,
-    member_name VARCHAR(100) NOT NULL,
-    phone VARCHAR(20),
-    email VARCHAR(100),
-    address TEXT,
-    points INT DEFAULT 0,
-    total_spent DECIMAL(15,2) DEFAULT 0.00,
-    join_date DATE NOT NULL,
-    birth_date DATE,
-    is_active TINYINT(1) DEFAULT 1,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_member_code (member_code),
-    INDEX idx_phone (phone),
-    INDEX idx_is_active (is_active)
+CREATE TABLE IF NOT EXISTS `members` (
+  `member_id` int(11) NOT NULL AUTO_INCREMENT,
+  `member_code` varchar(50) NOT NULL,
+  `member_name` varchar(100) NOT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `email` varchar(100) DEFAULT NULL,
+  `address` text DEFAULT NULL,
+  `points` int(11) DEFAULT 0,
+  `total_spent` decimal(15,2) DEFAULT 0.00,
+  `join_date` date NOT NULL,
+  `birth_date` date DEFAULT NULL,
+  `is_active` tinyint(1) DEFAULT 1,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`member_id`),
+  UNIQUE KEY `member_code` (`member_code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Table: transactions
-CREATE TABLE IF NOT EXISTS transactions (
-    transaction_id INT AUTO_INCREMENT PRIMARY KEY,
-    transaction_code VARCHAR(50) NOT NULL UNIQUE,
-    user_id INT NOT NULL,
-    member_id INT NULL,
-    transaction_date DATETIME NOT NULL,
-    subtotal DECIMAL(15,2) NOT NULL,
-    discount DECIMAL(15,2) DEFAULT 0.00,
-    tax DECIMAL(15,2) DEFAULT 0.00,
-    total_amount DECIMAL(15,2) NOT NULL,
-    payment_method ENUM('cash', 'qris', 'transfer', 'debit', 'credit') NOT NULL DEFAULT 'cash',
-    cash_received DECIMAL(15,2) DEFAULT 0.00,
-    change_amount DECIMAL(15,2) DEFAULT 0.00,
-    points_earned INT DEFAULT 0,
-    notes TEXT,
-    status ENUM('pending', 'completed', 'cancelled') DEFAULT 'completed',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(user_id),
-    FOREIGN KEY (member_id) REFERENCES members(member_id) ON DELETE SET NULL,
-    INDEX idx_transaction_code (transaction_code),
-    INDEX idx_transaction_date (transaction_date),
-    INDEX idx_user_id (user_id),
-    INDEX idx_status (status)
+CREATE TABLE IF NOT EXISTS `transactions` (
+  `transaction_id` int(11) NOT NULL AUTO_INCREMENT,
+  `transaction_code` varchar(50) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `member_id` int(11) DEFAULT NULL,
+  `transaction_date` datetime NOT NULL,
+  `subtotal` decimal(15,2) NOT NULL,
+  `discount` decimal(15,2) DEFAULT 0.00,
+  `tax` decimal(15,2) DEFAULT 0.00,
+  `total_amount` decimal(15,2) NOT NULL,
+  `payment_method` enum('cash','qris','transfer','debit','credit') NOT NULL DEFAULT 'cash',
+  `cash_received` decimal(15,2) DEFAULT 0.00,
+  `change_amount` decimal(15,2) DEFAULT 0.00,
+  `points_earned` int(11) DEFAULT 0,
+  `notes` text DEFAULT NULL,
+  `status` enum('pending','completed','cancelled') DEFAULT 'completed',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`transaction_id`),
+  UNIQUE KEY `transaction_code` (`transaction_code`),
+  KEY `idx_transactions_date` (`transaction_date`),
+  KEY `idx_transactions_user` (`user_id`),
+  KEY `fk_transactions_member` (`member_id`),
+  CONSTRAINT `fk_transactions_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`),
+  CONSTRAINT `fk_transactions_member` FOREIGN KEY (`member_id`) REFERENCES `members` (`member_id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Table: transaction_items
-CREATE TABLE IF NOT EXISTS transaction_items (
-    item_id INT AUTO_INCREMENT PRIMARY KEY,
-    transaction_id INT NOT NULL,
-    product_id INT NOT NULL,
-    product_name VARCHAR(200) NOT NULL,
-    quantity INT NOT NULL,
-    unit_price DECIMAL(12,2) NOT NULL,
-    subtotal DECIMAL(15,2) NOT NULL,
-    notes TEXT,
-    status ENUM('pending', 'preparing', 'ready', 'served') DEFAULT 'pending',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (transaction_id) REFERENCES transactions(transaction_id) ON DELETE CASCADE,
-    FOREIGN KEY (product_id) REFERENCES products(product_id),
-    INDEX idx_transaction_id (transaction_id),
-    INDEX idx_product_id (product_id),
-    INDEX idx_status (status)
+CREATE TABLE IF NOT EXISTS `transaction_items` (
+  `item_id` int(11) NOT NULL AUTO_INCREMENT,
+  `transaction_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `product_name` varchar(200) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `unit_price` decimal(12,2) NOT NULL,
+  `subtotal` decimal(15,2) NOT NULL,
+  `notes` text DEFAULT NULL,
+  `status` enum('pending','preparing','ready','served') DEFAULT 'pending',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`item_id`),
+  KEY `idx_transaction_items_transaction` (`transaction_id`),
+  KEY `idx_transaction_items_product` (`product_id`),
+  CONSTRAINT `fk_transaction_items_transaction` FOREIGN KEY (`transaction_id`) REFERENCES `transactions` (`transaction_id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_transaction_items_product` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Table: stock_history
-CREATE TABLE IF NOT EXISTS stock_history (
-    history_id INT AUTO_INCREMENT PRIMARY KEY,
-    product_id INT NOT NULL,
-    transaction_id INT NULL,
-    type ENUM('in', 'out', 'adjustment') NOT NULL,
-    quantity INT NOT NULL,
-    stock_before INT NOT NULL,
-    stock_after INT NOT NULL,
-    notes TEXT,
-    created_by INT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE,
-    FOREIGN KEY (transaction_id) REFERENCES transactions(transaction_id) ON DELETE SET NULL,
-    FOREIGN KEY (created_by) REFERENCES users(user_id),
-    INDEX idx_product_id (product_id),
-    INDEX idx_type (type),
-    INDEX idx_created_at (created_at)
+CREATE TABLE IF NOT EXISTS `stock_history` (
+  `history_id` int(11) NOT NULL AUTO_INCREMENT,
+  `product_id` int(11) NOT NULL,
+  `transaction_id` int(11) DEFAULT NULL,
+  `type` enum('in','out','adjustment') NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `stock_before` int(11) NOT NULL,
+  `stock_after` int(11) NOT NULL,
+  `notes` text DEFAULT NULL,
+  `created_by` int(11) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`history_id`),
+  KEY `idx_stock_history_product` (`product_id`),
+  KEY `fk_stock_history_transaction` (`transaction_id`),
+  KEY `fk_stock_history_user` (`created_by`),
+  CONSTRAINT `fk_stock_history_product` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_stock_history_transaction` FOREIGN KEY (`transaction_id`) REFERENCES `transactions` (`transaction_id`) ON DELETE SET NULL,
+  CONSTRAINT `fk_stock_history_user` FOREIGN KEY (`created_by`) REFERENCES `users` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Table: expenses
-CREATE TABLE IF NOT EXISTS expenses (
-    expense_id INT AUTO_INCREMENT PRIMARY KEY,
-    expense_category VARCHAR(100) NOT NULL,
-    amount DECIMAL(15,2) NOT NULL,
-    description TEXT,
-    expense_date DATE NOT NULL,
-    payment_method ENUM('cash', 'transfer', 'debit', 'credit') DEFAULT 'cash',
-    receipt_number VARCHAR(100),
-    created_by INT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (created_by) REFERENCES users(user_id),
-    INDEX idx_expense_date (expense_date),
-    INDEX idx_category (expense_category)
+CREATE TABLE IF NOT EXISTS `expenses` (
+  `expense_id` int(11) NOT NULL AUTO_INCREMENT,
+  `expense_category` varchar(100) NOT NULL,
+  `amount` decimal(15,2) NOT NULL,
+  `description` text DEFAULT NULL,
+  `expense_date` date NOT NULL,
+  `payment_method` enum('cash','transfer','debit','credit') DEFAULT 'cash',
+  `receipt_number` varchar(100) DEFAULT NULL,
+  `created_by` int(11) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`expense_id`),
+  KEY `idx_expenses_date` (`expense_date`),
+  KEY `fk_expenses_user` (`created_by`),
+  CONSTRAINT `fk_expenses_user` FOREIGN KEY (`created_by`) REFERENCES `users` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Table: settings
-CREATE TABLE IF NOT EXISTS settings (
-    setting_id INT AUTO_INCREMENT PRIMARY KEY,
-    setting_key VARCHAR(100) NOT NULL UNIQUE,
-    setting_value TEXT NOT NULL,
-    description TEXT,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_setting_key (setting_key)
+CREATE TABLE IF NOT EXISTS `settings` (
+  `setting_id` int(11) NOT NULL AUTO_INCREMENT,
+  `setting_key` varchar(100) NOT NULL,
+  `setting_value` text NOT NULL,
+  `description` text DEFAULT NULL,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`setting_id`),
+  UNIQUE KEY `setting_key` (`setting_key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- --------------------------------------------------------
--- INSERT DEFAULT DATA
--- --------------------------------------------------------
+-- Insert default users (password: admin123)
+INSERT INTO `users` (`username`, `password`, `full_name`, `email`, `role`, `is_active`) VALUES
+('admin', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Administrator', 'admin@stasiunkerang.com', 'admin', 1),
+('kasir1', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Kasir 1', 'kasir1@stasiunkerang.com', 'kasir', 1);
 
--- Insert default users
--- Password for both: "password" (hashed with PHP password_hash)
-INSERT INTO users (username, password, full_name, email, role, is_active) VALUES
-('admin', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Administrator', 'admin@smartrestopos.com', 'admin', 1),
-('kasir1', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Kasir Satu', 'kasir1@smartrestopos.com', 'kasir', 1),
-('kasir2', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Kasir Dua', 'kasir2@smartrestopos.com', 'kasir', 1);
+-- Insert categories
+INSERT INTO `categories` (`category_name`, `description`, `icon`, `is_active`) VALUES
+('Gerbong', 'Menu paket gerbong', 'fa-box', 1),
+('Kepiting Mix', 'Menu kepiting mix', 'fa-utensils', 1),
+('Lobster Mix', 'Menu lobster mix', 'fa-fish', 1),
+('Cumi Udang', 'Menu cumi dan udang', 'fa-shrimp', 1),
+('Ayam Ceker', 'Menu ayam dan ceker', 'fa-drumstick-bite', 1),
+('Kerang Kiloan', 'Menu kerang kiloan', 'fa-clam', 1),
+('Sayur', 'Menu sayuran', 'fa-leaf', 1),
+('Minuman', 'Menu minuman', 'fa-glass-water', 1),
+('Nasi', 'Nasi putih', 'fa-bowl-rice', 1),
+('Paket Spesial', 'Paket menu spesial', 'fa-star', 1);
 
--- Insert default categories
-INSERT INTO categories (category_name, description, icon, is_active) VALUES
-('Makanan Utama', 'Menu makanan utama restoran', 'fa-utensils', 1),
-('Minuman', 'Menu minuman panas dan dingin', 'fa-glass-water', 1),
-('Snack', 'Menu cemilan dan appetizer', 'fa-cookie-bite', 1),
-('Dessert', 'Menu pencuci mulut', 'fa-ice-cream', 1),
-('Paket', 'Menu paket hemat', 'fa-box', 1);
+-- Insert products from Stasiun Kerang menu
+INSERT INTO `products` (`category_id`, `product_name`, `description`, `cost_price`, `selling_price`, `stock_quantity`, `unit`) VALUES
+-- Gerbong
+(1, 'Gerbong 1 (3 Varian Kerang)', 'Paket 3 varian kerang', 60000, 130000, 20, 'paket'),
+(1, 'Gerbong 2 (4 Varian Kerang)', 'Paket 4 varian kerang', 80000, 160000, 20, 'paket'),
+(1, 'Gerbong 3 (5 Varian Kerang)', 'Paket 5 varian kerang', 100000, 180000, 15, 'paket'),
 
--- Insert sample products
-INSERT INTO products (category_id, product_name, description, cost_price, selling_price, stock_quantity, min_stock, unit, is_active) VALUES
--- Makanan Utama
-(1, 'Nasi Goreng Spesial', 'Nasi goreng dengan telur, ayam, dan sayuran pilihan', 12000, 25000, 50, 10, 'porsi', 1),
-(1, 'Mie Goreng', 'Mie goreng dengan sayuran segar', 8000, 18000, 50, 10, 'porsi', 1),
-(1, 'Ayam Bakar', 'Ayam bakar dengan sambal kecap pedas', 15000, 30000, 30, 5, 'porsi', 1),
-(1, 'Soto Ayam', 'Soto ayam kuning dengan nasi putih', 10000, 20000, 40, 10, 'porsi', 1),
-(1, 'Nasi Uduk Komplit', 'Nasi uduk dengan lauk lengkap', 13000, 28000, 35, 8, 'porsi', 1),
-(1, 'Nasi Rawon', 'Rawon daging sapi dengan nasi putih', 18000, 35000, 25, 5, 'porsi', 1),
+-- Kepiting Mix
+(2, 'Kepiting Mix 1 (Kepiting + Kerang 1 varian)', 'Kepiting dengan 1 varian kerang', 50000, 85000, 15, 'porsi'),
+(2, 'Kepiting Mix 2 (Kepiting + 2 Varian Kerang)', 'Kepiting dengan 2 varian kerang', 60000, 100000, 15, 'porsi'),
+(2, 'Kepiting Mix 3 (Kepiting + 3 Varian Kerang)', 'Kepiting dengan 3 varian kerang', 70000, 120000, 12, 'porsi'),
+(2, 'Kepiting Mix 4 (Kepiting + Gurita + Cumi + Udang)', 'Kepiting lengkap dengan seafood', 80000, 140000, 10, 'porsi'),
+(2, 'Kepiting Mix 5 (Kepiting + Gurita + Cumi + Udang + 2 Varian Kerang)', 'Kepiting spesial dengan kerang', 95000, 165000, 10, 'porsi'),
+
+-- Lobster Mix
+(3, 'Lobster Mix 1 (Lobster + Kerang 1 varian)', 'Lobster dengan 1 varian kerang', 60000, 100000, 10, 'porsi'),
+(3, 'Lobster Mix 2 (Lobster + 2 Varian Kerang)', 'Lobster dengan 2 varian kerang', 70000, 120000, 10, 'porsi'),
+(3, 'Lobster Mix 3 (Lobster + 3 Varian Kerang)', 'Lobster dengan 3 varian kerang', 80000, 140000, 8, 'porsi'),
+(3, 'Lobster Mix 4 (Lobster + Gurita + Cumi + Udang)', 'Lobster lengkap dengan seafood', 95000, 160000, 8, 'porsi'),
+(3, 'Lobster Mix 5 (Lobster + Gurita + Cumi + Udang + 2 Varian Kerang)', 'Lobster spesial dengan kerang', 110000, 180000, 5, 'porsi'),
+
+-- Cumi / Udang
+(4, 'Cumi Goreng Mentega', 'Cumi goreng dengan saus mentega', 20000, 35000, 30, 'porsi'),
+(4, 'Cumi Asam Manis', 'Cumi dengan saus asam manis', 20000, 35000, 30, 'porsi'),
+(4, 'Cumi Saus Padang', 'Cumi dengan saus padang pedas', 20000, 35000, 30, 'porsi'),
+(4, 'Cumi Saus Tiram', 'Cumi dengan saus tiram', 20000, 35000, 30, 'porsi'),
+(4, 'Udang Goreng Mentega', 'Udang goreng dengan saus mentega', 22000, 40000, 25, 'porsi'),
+(4, 'Udang Goreng Asam Manis', 'Udang dengan saus asam manis', 22000, 40000, 25, 'porsi'),
+(4, 'Udang Goreng Saus Padang', 'Udang dengan saus padang pedas', 22000, 40000, 25, 'porsi'),
+(4, 'Udang Goreng Saus Tiram', 'Udang dengan saus tiram', 22000, 40000, 25, 'porsi'),
+
+-- Ayam / Ceker
+(5, 'Ceker Balado', 'Ceker ayam dengan sambal balado', 8000, 15000, 50, 'porsi'),
+(5, 'Ceker Mentega', 'Ceker ayam dengan saus mentega', 8000, 15000, 50, 'porsi'),
+(5, 'Ceker Saus Padang', 'Ceker ayam dengan saus padang', 8000, 15000, 50, 'porsi'),
+(5, 'Ceker Asam Manis', 'Ceker ayam dengan saus asam manis', 8000, 15000, 50, 'porsi'),
+(5, 'Ceker Pedas Manis', 'Ceker ayam pedas manis', 8000, 15000, 50, 'porsi'),
+(5, 'Ceker Lada Hitam', 'Ceker ayam dengan lada hitam', 8000, 15000, 50, 'porsi'),
+(5, 'Ayam Goreng Asam Manis', 'Ayam goreng dengan saus asam manis', 10000, 18000, 40, 'porsi'),
+(5, 'Ayam Goreng Pedas Manis', 'Ayam goreng pedas manis', 10000, 18000, 40, 'porsi'),
+(5, 'Ayam Goreng Mentega', 'Ayam goreng dengan saus mentega', 10000, 18000, 40, 'porsi'),
+(5, 'Ayam Saus Padang', 'Ayam dengan saus padang pedas', 10000, 18000, 40, 'porsi'),
+(5, 'Ayam Goreng Lada Hitam', 'Ayam goreng dengan lada hitam', 10000, 18000, 40, 'porsi'),
+
+-- Kerang Kiloan
+(6, 'Kerang Hijau', 'Kerang hijau segar per kg', 25000, 45000, 50, 'kg'),
+(6, 'Kerang Tahu', 'Kerang tahu segar per kg', 28000, 50000, 40, 'kg'),
+(6, 'Kerang Dara', 'Kerang dara segar per kg', 30000, 55000, 35, 'kg'),
+(6, 'Kerang Batik', 'Kerang batik segar per kg', 35000, 65000, 30, 'kg'),
+(6, 'Kerang Simping', 'Kerang simping segar per kg', 40000, 75000, 25, 'kg'),
+(6, 'Kerang Bambu', 'Kerang bambu segar per kg', 45000, 80000, 20, 'kg'),
+(6, 'Kerang Macan', 'Kerang macan segar per kg', 40000, 75000, 25, 'kg'),
+
+-- Sayur
+(7, 'Kangkung Cah Polos', 'Tumis kangkung polos', 5000, 10000, 60, 'porsi'),
+(7, 'Kangkung Cah Seafood', 'Tumis kangkung dengan seafood', 8000, 15000, 50, 'porsi'),
 
 -- Minuman
-(2, 'Es Teh Manis', 'Es teh manis segar', 2000, 5000, 100, 20, 'gelas', 1),
-(2, 'Jus Jeruk', 'Jus jeruk segar tanpa gula', 5000, 12000, 50, 10, 'gelas', 1),
-(2, 'Kopi Hitam', 'Kopi hitam panas original', 3000, 8000, 80, 15, 'gelas', 1),
-(2, 'Cappuccino', 'Cappuccino dengan foam susu', 6000, 15000, 60, 10, 'gelas', 1),
-(2, 'Es Jeruk', 'Es jeruk segar dengan potongan buah', 3000, 8000, 75, 15, 'gelas', 1),
-(2, 'Thai Tea', 'Thai tea original dengan susu', 5000, 12000, 55, 10, 'gelas', 1),
+(8, 'Teh Tawar', 'Teh tawar panas/dingin', 1500, 3000, 100, 'gelas'),
+(8, 'Teh Botol', 'Teh botol kemasan', 2000, 4000, 80, 'botol'),
+(8, 'Teh Manis', 'Teh manis panas/dingin', 2500, 5000, 100, 'gelas'),
+(8, 'Teh Lemon', 'Teh lemon segar', 3000, 8000, 60, 'gelas'),
+(8, 'Cappucino', 'Cappucino panas', 4000, 8000, 50, 'gelas'),
+(8, 'Teh Tarik', 'Teh tarik spesial', 4000, 8000, 50, 'gelas'),
+(8, 'Jeruk', 'Jus jeruk segar', 4500, 8000, 50, 'gelas'),
+(8, 'Mineral', 'Air mineral botol', 2500, 5000, 100, 'botol'),
 
--- Snack
-(3, 'Pisang Goreng', 'Pisang goreng crispy dengan keju', 3000, 8000, 40, 10, 'porsi', 1),
-(3, 'Kentang Goreng', 'Kentang goreng dengan saus sambal', 5000, 12000, 35, 10, 'porsi', 1),
-(3, 'Tahu Isi', 'Tahu isi sayuran dan daging', 4000, 10000, 45, 10, 'porsi', 1),
-(3, 'Risoles Mayo', 'Risoles isi mayo dan sayuran', 4500, 11000, 38, 8, 'porsi', 1),
+-- Nasi
+(9, 'Nasi Putih', 'Nasi putih hangat', 2500, 5000, 200, 'porsi'),
 
--- Dessert
-(4, 'Es Krim Vanilla', 'Es krim vanilla premium', 7000, 15000, 25, 5, 'cup', 1),
-(4, 'Pudding Coklat', 'Pudding coklat dengan vla', 4000, 10000, 30, 5, 'cup', 1),
-(4, 'Es Campur', 'Es campur buah dengan sirup', 8000, 18000, 22, 5, 'porsi', 1),
-(4, 'Pancake', 'Pancake dengan madu dan mentega', 6000, 15000, 28, 6, 'porsi', 1),
+-- Paket Spesial  
+(10, 'Octopus Porsi', 'Gurita/octopus 1 porsi', 22000, 40000, 15, 'porsi'),
+(10, 'Kepiting Porsi', 'Kepiting 1 porsi', 70000, 120000, 10, 'porsi'),
+(10, 'Lobster Porsi', 'Lobster 1 porsi', 90000, 130000, 8, 'porsi');
 
--- Paket
-(5, 'Paket Hemat A', 'Nasi goreng + es teh manis', 14000, 27000, 40, 8, 'paket', 1),
-(5, 'Paket Hemat B', 'Ayam bakar + nasi + es jeruk', 20000, 38000, 30, 5, 'paket', 1);
-
--- Insert default settings
-INSERT INTO settings (setting_key, setting_value, description) VALUES
-('restaurant_name', 'Smart Resto POS', 'Nama restoran'),
-('restaurant_address', 'Jl. Merdeka No. 123, Jakarta Pusat', 'Alamat restoran'),
-('restaurant_phone', '021-12345678', 'Nomor telepon restoran'),
-('restaurant_email', 'info@smartrestopos.com', 'Email restoran'),
-('tax_rate', '10', 'Persentase pajak (PB1) dalam persen'),
-('points_per_1000', '1', 'Jumlah poin yang didapat per Rp 1.000 belanja'),
-('receipt_footer', 'Terima kasih atas kunjungan Anda. Sampai jumpa lagi!', 'Teks footer pada struk'),
-('currency', 'Rp', 'Simbol mata uang'),
-('receipt_print_auto', '0', 'Auto print struk setelah transaksi (0=tidak, 1=ya)'),
-('low_stock_alert', '1', 'Aktifkan notifikasi stok menipis (0=tidak, 1=ya)');
-
--- --------------------------------------------------------
--- SAMPLE DATA (Optional - untuk testing)
--- --------------------------------------------------------
-
--- Insert sample member
-INSERT INTO members (member_code, member_name, phone, email, address, points, total_spent, join_date, is_active) VALUES
-('MBR20250101', 'Budi Santoso', '081234567890', 'budi@example.com', 'Jakarta Selatan', 150, 1500000, '2025-01-01', 1),
-('MBR20250102', 'Siti Aminah', '081234567891', 'siti@example.com', 'Jakarta Timur', 85, 850000, '2025-01-02', 1);
-
--- Note: Sample transactions tidak diinsert agar database fresh untuk production
+-- Insert settings
+INSERT INTO `settings` (`setting_key`, `setting_value`, `description`) VALUES
+('restaurant_name', 'Stasiun Kerang', 'Nama restoran'),
+('restaurant_address', 'Depok, Jawa Barat', 'Alamat restoran'),
+('restaurant_phone', '0812-3456-7890', 'Telepon restoran'),
+('restaurant_instagram', '@stasiunkerang', 'Instagram restoran'),
+('tax_rate', '10', 'Persentase pajak'),
+('points_per_1000', '1', 'Poin per Rp 1.000'),
+('receipt_footer', 'Terima kasih atas kunjungan Anda', 'Footer struk'),
+('currency', 'Rp', 'Simbol mata uang');
