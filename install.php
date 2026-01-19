@@ -1,7 +1,7 @@
 <?php
 /**
- * Smart Resto POS - Auto Database Installer for Railway
- * Visit: https://your-app.railway.app/install.php
+ * Smart Resto POS - Database Installer for Railway
+ * Creates database directly without SQL file
  */
 
 // Prevent running if already installed
@@ -11,13 +11,13 @@ if (file_exists($lock_file)) {
     <!DOCTYPE html>
     <html>
     <head>
-        <title>Already Installed</title>
         <meta charset='utf-8'>
+        <title>Already Installed</title>
         <style>
-            body { font-family: sans-serif; padding: 50px; text-align: center; background: #f5f5f5; }
-            .message { background: white; padding: 40px; border-radius: 10px; max-width: 500px; margin: 0 auto; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+            body { font-family: sans-serif; padding: 50px; text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+            .message { background: white; padding: 40px; border-radius: 20px; max-width: 500px; margin: 0 auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
             h1 { color: #27ae60; }
-            .btn { display: inline-block; margin: 10px; padding: 10px 20px; background: #3498db; color: white; text-decoration: none; border-radius: 5px; }
+            .btn { display: inline-block; margin: 10px; padding: 12px 24px; background: #3498db; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; }
             .btn-danger { background: #e74c3c; }
         </style>
     </head>
@@ -25,12 +25,9 @@ if (file_exists($lock_file)) {
         <div class='message'>
             <h1>✅ Already Installed</h1>
             <p>Database has been installed successfully.</p>
-            <p><a href='index.php' class='btn'>Go to Application</a></p>
-            <hr>
-            <p><strong>To reinstall:</strong></p>
-            <p><small>Delete file: <code>.installed.lock</code></small></p>
-            <form method='post' action='?action=reset' style='display: inline;'>
-                <button type='submit' class='btn btn-danger' onclick='return confirm(\"Are you sure? This will allow reinstallation.\")'>Reset Installation</button>
+            <a href='index.php' class='btn'>Go to Application</a>
+            <form method='post' action='?action=reset' style='margin-top: 20px;'>
+                <button type='submit' class='btn btn-danger' onclick='return confirm(\"Reset installation?\")'>Reset & Reinstall</button>
             </form>
         </div>
     </body>
@@ -60,7 +57,7 @@ $dbname = getenv('MYSQLDATABASE') ?: 'railway';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Resto POS - Database Installer</title>
+    <title>Stasiun Kerang - Database Installer</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -112,12 +109,8 @@ $dbname = getenv('MYSQLDATABASE') ?: 'railway';
             width: 100%;
             text-align: center;
         }
-        .btn:hover { background: #2980b9; transform: translateY(-2px); }
-        .btn:disabled {
-            background: #95a5a6;
-            cursor: not-allowed;
-            transform: none;
-        }
+        .btn:hover { background: #2980b9; }
+        .btn:disabled { background: #95a5a6; cursor: not-allowed; }
         #result {
             margin-top: 20px;
             padding: 20px;
@@ -160,12 +153,11 @@ $dbname = getenv('MYSQLDATABASE') ?: 'railway';
         .log-success { color: #2ecc71; }
         .log-error { color: #e74c3c; }
         .log-info { color: #3498db; }
-        .log-warning { color: #f39c12; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🍽️ Smart Resto POS</h1>
+        <h1>🦐 Stasiun Kerang POS</h1>
         <h2>Database Installation Wizard</h2>
 
         <div class="info-box">
@@ -178,7 +170,7 @@ $dbname = getenv('MYSQLDATABASE') ?: 'railway';
 
         <div class="info-box" style="border-left-color: #e74c3c;">
             <strong>⚠️ Important:</strong>
-            This will create all necessary database tables. Make sure you have backup if reinstalling.
+            This will create all database tables for Stasiun Kerang POS system.
         </div>
 
         <button class="btn" id="installBtn" onclick="installDatabase()">
@@ -234,41 +226,26 @@ $dbname = getenv('MYSQLDATABASE') ?: 'railway';
                         <p>${data.message}</p>
                         <p><strong>Tables created:</strong> ${data.tables_created}</p>
                         <hr style="margin: 15px 0;">
-                        <p><strong>📝 Default Login Credentials:</strong></p>
-                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 10px 0;">
-                            <p>Username: <code style="background: #fff; padding: 5px 10px; border-radius: 4px;">admin</code></p>
-                            <p>Password: <code style="background: #fff; padding: 5px 10px; border-radius: 4px;">admin123</code></p>
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                            <p><strong>📝 Default Login:</strong></p>
+                            <p>Username: <code style="background: #fff; padding: 5px 10px;">admin</code></p>
+                            <p>Password: <code style="background: #fff; padding: 5px 10px;">admin123</code></p>
                         </div>
                         <p style="margin-top: 15px;">
-                            <a href="index.php" class="btn" style="text-decoration: none; display: inline-block; padding: 12px 30px;">Go to Application →</a>
+                            <a href="index.php" class="btn">Go to Application →</a>
                         </p>
                     `;
-                    addLog('Installation completed successfully!', 'success');
-                    if (data.logs && data.logs.length > 0) {
-                        data.logs.forEach(log => {
-                            if (log.includes('Error') || log.includes('Failed')) {
-                                addLog(log, 'error');
-                            } else if (log.includes('Warning')) {
-                                addLog(log, 'warning');
-                            } else {
-                                addLog(log, 'success');
-                            }
-                        });
-                    }
+                    data.logs.forEach(log => {
+                        addLog(log, log.includes('✓') ? 'success' : 'info');
+                    });
                 } else {
                     result.className = 'error';
                     result.innerHTML = `
                         <h3>❌ Installation Failed</h3>
                         <p>${data.message}</p>
-                        <div style="background: #fff; padding: 15px; border-radius: 8px; margin: 10px 0; font-family: monospace; font-size: 12px; max-height: 200px; overflow-y: auto;">
-                            ${data.error ? data.error.replace(/\n/g, '<br>') : 'Unknown error'}
-                        </div>
-                        <p><small>Check the log below for more details.</small></p>
+                        <pre style="background: #fff; padding: 15px; border-radius: 5px; overflow-x: auto; font-size: 11px;">${data.error}</pre>
                     `;
                     addLog('Installation failed: ' + data.error, 'error');
-                    if (data.logs && data.logs.length > 0) {
-                        data.logs.forEach(log => addLog(log, 'warning'));
-                    }
                     btn.disabled = false;
                 }
             } catch (error) {
@@ -277,10 +254,7 @@ $dbname = getenv('MYSQLDATABASE') ?: 'railway';
                 result.className = 'error';
                 result.innerHTML = `
                     <h3>❌ Installation Error</h3>
-                    <p>An unexpected error occurred.</p>
-                    <div style="background: #fff; padding: 15px; border-radius: 8px; margin: 10px 0; font-family: monospace; font-size: 12px;">
-                        ${error.message}
-                    </div>
+                    <p>An unexpected error occurred: ${error.message}</p>
                 `;
                 addLog('Error: ' + error.message, 'error');
                 btn.disabled = false;
@@ -308,110 +282,221 @@ if (isset($_GET['action']) && $_GET['action'] === 'install') {
         }
         
         $conn->set_charset("utf8mb4");
-        $logs[] = "✓ Connected to database successfully";
+        $logs[] = "✓ Connected to database";
         
-        // Read SQL file
-        $sql_file = __DIR__ . '/Database Schema.sql';
-        if (!file_exists($sql_file)) {
-            throw new Exception("Database Schema.sql file not found in: " . __DIR__);
-        }
-        
-        $sql = file_get_contents($sql_file);
-        $logs[] = "✓ Loaded database schema file (" . number_format(strlen($sql)) . " bytes)";
-        
-        // Clean up SQL file - remove BOM and problematic characters
-        $sql = preg_replace('/^\xEF\xBB\xBF/', '', $sql); // Remove UTF-8 BOM
-        $sql = str_replace(["\r\n", "\r"], "\n", $sql); // Normalize line endings
-        
-        // Split SQL into individual statements more carefully
-        $statements = [];
-        $current_statement = '';
-        $in_string = false;
-        $string_char = '';
-        
-        for ($i = 0; $i < strlen($sql); $i++) {
-            $char = $sql[$i];
+        // Define all SQL statements as PHP array (no external file needed!)
+        $sqls = [
+            // Table: users
+            "CREATE TABLE IF NOT EXISTS `users` (
+              `user_id` int(11) NOT NULL AUTO_INCREMENT,
+              `username` varchar(50) NOT NULL,
+              `password` varchar(255) NOT NULL,
+              `full_name` varchar(100) NOT NULL,
+              `email` varchar(100) DEFAULT NULL,
+              `phone` varchar(20) DEFAULT NULL,
+              `role` enum('admin','kasir') NOT NULL DEFAULT 'kasir',
+              `is_active` tinyint(1) DEFAULT 1,
+              `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+              `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+              PRIMARY KEY (`user_id`),
+              UNIQUE KEY `username` (`username`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
             
-            // Handle string literals
-            if (($char === '"' || $char === "'") && ($i === 0 || $sql[$i-1] !== '\\')) {
-                if (!$in_string) {
-                    $in_string = true;
-                    $string_char = $char;
-                } elseif ($char === $string_char) {
-                    $in_string = false;
+            // Table: categories
+            "CREATE TABLE IF NOT EXISTS `categories` (
+              `category_id` int(11) NOT NULL AUTO_INCREMENT,
+              `category_name` varchar(100) NOT NULL,
+              `description` text DEFAULT NULL,
+              `icon` varchar(50) DEFAULT NULL,
+              `is_active` tinyint(1) DEFAULT 1,
+              `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+              PRIMARY KEY (`category_id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
+            
+            // Table: products
+            "CREATE TABLE IF NOT EXISTS `products` (
+              `product_id` int(11) NOT NULL AUTO_INCREMENT,
+              `category_id` int(11) NOT NULL,
+              `product_name` varchar(200) NOT NULL,
+              `description` text DEFAULT NULL,
+              `image` varchar(255) DEFAULT NULL,
+              `cost_price` decimal(12,2) DEFAULT 0.00,
+              `selling_price` decimal(12,2) NOT NULL,
+              `stock_quantity` int(11) DEFAULT 0,
+              `min_stock` int(11) DEFAULT 5,
+              `unit` varchar(50) DEFAULT 'porsi',
+              `is_active` tinyint(1) DEFAULT 1,
+              `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+              `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+              PRIMARY KEY (`product_id`),
+              KEY `category_id` (`category_id`),
+              CONSTRAINT `fk_products_category` FOREIGN KEY (`category_id`) REFERENCES `categories` (`category_id`) ON DELETE CASCADE
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
+            
+            // Table: members
+            "CREATE TABLE IF NOT EXISTS `members` (
+              `member_id` int(11) NOT NULL AUTO_INCREMENT,
+              `member_code` varchar(50) NOT NULL,
+              `member_name` varchar(100) NOT NULL,
+              `phone` varchar(20) DEFAULT NULL,
+              `email` varchar(100) DEFAULT NULL,
+              `address` text DEFAULT NULL,
+              `points` int(11) DEFAULT 0,
+              `total_spent` decimal(15,2) DEFAULT 0.00,
+              `join_date` date NOT NULL,
+              `birth_date` date DEFAULT NULL,
+              `is_active` tinyint(1) DEFAULT 1,
+              `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+              `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+              PRIMARY KEY (`member_id`),
+              UNIQUE KEY `member_code` (`member_code`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
+            
+            // Table: transactions
+            "CREATE TABLE IF NOT EXISTS `transactions` (
+              `transaction_id` int(11) NOT NULL AUTO_INCREMENT,
+              `transaction_code` varchar(50) NOT NULL,
+              `user_id` int(11) NOT NULL,
+              `member_id` int(11) DEFAULT NULL,
+              `transaction_date` datetime NOT NULL,
+              `subtotal` decimal(15,2) NOT NULL,
+              `discount` decimal(15,2) DEFAULT 0.00,
+              `tax` decimal(15,2) DEFAULT 0.00,
+              `total_amount` decimal(15,2) NOT NULL,
+              `payment_method` enum('cash','qris','transfer','debit','credit') NOT NULL DEFAULT 'cash',
+              `cash_received` decimal(15,2) DEFAULT 0.00,
+              `change_amount` decimal(15,2) DEFAULT 0.00,
+              `points_earned` int(11) DEFAULT 0,
+              `notes` text DEFAULT NULL,
+              `status` enum('pending','completed','cancelled') DEFAULT 'completed',
+              `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+              PRIMARY KEY (`transaction_id`),
+              UNIQUE KEY `transaction_code` (`transaction_code`),
+              KEY `user_id` (`user_id`),
+              KEY `member_id` (`member_id`),
+              CONSTRAINT `fk_transactions_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`),
+              CONSTRAINT `fk_transactions_member` FOREIGN KEY (`member_id`) REFERENCES `members` (`member_id`) ON DELETE SET NULL
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
+            
+            // Table: transaction_items
+            "CREATE TABLE IF NOT EXISTS `transaction_items` (
+              `item_id` int(11) NOT NULL AUTO_INCREMENT,
+              `transaction_id` int(11) NOT NULL,
+              `product_id` int(11) NOT NULL,
+              `product_name` varchar(200) NOT NULL,
+              `quantity` int(11) NOT NULL,
+              `unit_price` decimal(12,2) NOT NULL,
+              `subtotal` decimal(15,2) NOT NULL,
+              `notes` text DEFAULT NULL,
+              `status` enum('pending','preparing','ready','served') DEFAULT 'pending',
+              `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+              `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+              PRIMARY KEY (`item_id`),
+              KEY `transaction_id` (`transaction_id`),
+              KEY `product_id` (`product_id`),
+              CONSTRAINT `fk_transaction_items_transaction` FOREIGN KEY (`transaction_id`) REFERENCES `transactions` (`transaction_id`) ON DELETE CASCADE,
+              CONSTRAINT `fk_transaction_items_product` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
+            
+            // Table: stock_history
+            "CREATE TABLE IF NOT EXISTS `stock_history` (
+              `history_id` int(11) NOT NULL AUTO_INCREMENT,
+              `product_id` int(11) NOT NULL,
+              `transaction_id` int(11) DEFAULT NULL,
+              `type` enum('in','out','adjustment') NOT NULL,
+              `quantity` int(11) NOT NULL,
+              `stock_before` int(11) NOT NULL,
+              `stock_after` int(11) NOT NULL,
+              `notes` text DEFAULT NULL,
+              `created_by` int(11) NOT NULL,
+              `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+              PRIMARY KEY (`history_id`),
+              KEY `product_id` (`product_id`),
+              KEY `transaction_id` (`transaction_id`),
+              KEY `created_by` (`created_by`),
+              CONSTRAINT `fk_stock_history_product` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON DELETE CASCADE,
+              CONSTRAINT `fk_stock_history_transaction` FOREIGN KEY (`transaction_id`) REFERENCES `transactions` (`transaction_id`) ON DELETE SET NULL,
+              CONSTRAINT `fk_stock_history_user` FOREIGN KEY (`created_by`) REFERENCES `users` (`user_id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
+            
+            // Table: expenses
+            "CREATE TABLE IF NOT EXISTS `expenses` (
+              `expense_id` int(11) NOT NULL AUTO_INCREMENT,
+              `expense_category` varchar(100) NOT NULL,
+              `amount` decimal(15,2) NOT NULL,
+              `description` text DEFAULT NULL,
+              `expense_date` date NOT NULL,
+              `payment_method` enum('cash','transfer','debit','credit') DEFAULT 'cash',
+              `receipt_number` varchar(100) DEFAULT NULL,
+              `created_by` int(11) NOT NULL,
+              `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+              PRIMARY KEY (`expense_id`),
+              KEY `created_by` (`created_by`),
+              CONSTRAINT `fk_expenses_user` FOREIGN KEY (`created_by`) REFERENCES `users` (`user_id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
+            
+            // Table: settings
+            "CREATE TABLE IF NOT EXISTS `settings` (
+              `setting_id` int(11) NOT NULL AUTO_INCREMENT,
+              `setting_key` varchar(100) NOT NULL,
+              `setting_value` text NOT NULL,
+              `description` text DEFAULT NULL,
+              `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+              PRIMARY KEY (`setting_id`),
+              UNIQUE KEY `setting_key` (`setting_key`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4"
+        ];
+        
+        // Execute table creation
+        foreach ($sqls as $sql) {
+            if ($conn->query($sql)) {
+                if (preg_match('/CREATE TABLE.*?`(\w+)`/i', $sql, $matches)) {
+                    $tables_created++;
+                    $logs[] = "✓ Created table: " . $matches[1];
+                }
+            } else {
+                if ($conn->errno != 1050) { // Ignore "table exists" error
+                    $logs[] = "⚠ Warning: " . $conn->error;
                 }
             }
-            
-            // Split on semicolon only if not in string
-            if ($char === ';' && !$in_string) {
-                $statements[] = trim($current_statement);
-                $current_statement = '';
-                continue;
-            }
-            
-            $current_statement .= $char;
         }
         
-        // Add last statement if exists
-        if (trim($current_statement)) {
-            $statements[] = trim($current_statement);
-        }
+        // Insert default data
+        $logs[] = "Inserting default data...";
         
-        $logs[] = "✓ Parsed " . count($statements) . " SQL statements";
+        // Insert users
+        $conn->query("INSERT IGNORE INTO users (username, password, full_name, email, role) VALUES 
+            ('admin', '\$2y\$10\$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Administrator', 'admin@stasiunkerang.com', 'admin'),
+            ('kasir1', '\$2y\$10\$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Kasir 1', 'kasir1@stasiunkerang.com', 'kasir')");
+        $logs[] = "✓ Inserted default users";
         
-        // Execute SQL statements
-        $success_count = 0;
-        $error_count = 0;
+        // Insert categories
+        $conn->query("INSERT IGNORE INTO categories (category_name, description, icon) VALUES 
+            ('Gerbong', 'Menu paket gerbong', 'fa-box'),
+            ('Kepiting Mix', 'Menu kepiting mix', 'fa-utensils'),
+            ('Lobster Mix', 'Menu lobster mix', 'fa-fish'),
+            ('Cumi Udang', 'Menu cumi dan udang', 'fa-shrimp'),
+            ('Ayam Ceker', 'Menu ayam dan ceker', 'fa-drumstick-bite'),
+            ('Kerang Kiloan', 'Menu kerang kiloan', 'fa-clam'),
+            ('Sayur', 'Menu sayuran', 'fa-leaf'),
+            ('Minuman', 'Menu minuman', 'fa-glass-water'),
+            ('Nasi', 'Nasi putih', 'fa-bowl-rice'),
+            ('Paket Spesial', 'Paket spesial', 'fa-star')");
+        $logs[] = "✓ Inserted categories";
         
-        foreach ($statements as $index => $statement) {
-            if (empty($statement)) continue;
-            
-            // Skip comments
-            if (substr($statement, 0, 2) === '--' || substr($statement, 0, 1) === '#') {
-                continue;
-            }
-            
-            try {
-                if ($conn->query($statement)) {
-                    // Count CREATE TABLE statements
-                    if (stripos($statement, 'CREATE TABLE') !== false) {
-                        $tables_created++;
-                        preg_match('/CREATE TABLE.*?`?(\w+)`?/i', $statement, $matches);
-                        if (isset($matches[1])) {
-                            $logs[] = "✓ Created table: " . $matches[1];
-                            $success_count++;
-                        }
-                    } elseif (stripos($statement, 'INSERT INTO') !== false) {
-                        $success_count++;
-                    }
-                } else {
-                    $error_code = $conn->errno;
-                    $error_msg = $conn->error;
-                    
-                    // Only log real errors, ignore "already exists" warnings
-                    if ($error_code != 1050 && $error_code != 1062) {
-                        $error_count++;
-                        $logs[] = "⚠ Error in statement " . ($index + 1) . ": " . $error_msg;
-                        
-                        // Show problematic statement (first 100 chars)
-                        $preview = substr($statement, 0, 100);
-                        if (strlen($statement) > 100) $preview .= '...';
-                        $logs[] = "   Statement: " . $preview;
-                    }
-                }
-            } catch (Exception $e) {
-                $error_count++;
-                $logs[] = "✗ Exception in statement " . ($index + 1) . ": " . $e->getMessage();
-            }
-        }
-        
-        $logs[] = "✓ Execution complete: $success_count successful, $error_count errors";
+        // Insert settings
+        $conn->query("INSERT IGNORE INTO settings (setting_key, setting_value, description) VALUES 
+            ('restaurant_name', 'Stasiun Kerang', 'Nama restoran'),
+            ('restaurant_address', 'Depok, Jawa Barat', 'Alamat restoran'),
+            ('tax_rate', '10', 'Persentase pajak'),
+            ('currency', 'Rp', 'Simbol mata uang')");
+        $logs[] = "✓ Inserted settings";
         
         $conn->close();
         
-        // Create lock file to prevent re-installation
-        file_put_contents($lock_file, date('Y-m-d H:i:s') . "\nTables: $tables_created");
-        $logs[] = "✓ Created installation lock file";
+        // Create lock file
+        file_put_contents($lock_file, date('Y-m-d H:i:s'));
+        $logs[] = "✓ Installation completed";
         
         echo json_encode([
             'success' => true,
